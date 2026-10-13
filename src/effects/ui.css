@@ -1,0 +1,350 @@
+/* dsh-selfskin · 插件自有 UI 样式（始终注入）
+ *
+ * These rows used to sit in `settings.general.item`, beside the host's own
+ * Appearance row; since 1.1.0 they live in the plugin's own sidebar panel. The
+ * row rhythm is still copied from the host's General rows on purpose —
+ * `border-bottom: .5px solid var(--dsw-alias-border-l2)`, `padding: 16px 0`,
+ * title 14/20, description 12/18 secondary — because `practices.md` asks a
+ * plugin to copy the host's markup and spacing rather than import its
+ * components, and to keep only `--dsw-alias-*` token references. Class names are
+ * prefixed `dss-` and are unrelated to the host's build-generated module
+ * classes.
+ */
+
+.dss-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.dss-rowWrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.dss-rowMain {
+    min-width: 0;
+    flex: 1;
+}
+
+.dss-title {
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--dsw-alias-label-primary);
+}
+
+.dss-desc {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-secondary);
+}
+
+.dss-end {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+.dss-stack {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+}
+
+/* ---- page: the sidebar panel's own container ----
+ *
+ * The host's `main` slot is a bare column. Every official panel — the plugin
+ * manager, the task manager — brings its own width, padding and heading,
+ * because the layout deliberately owns no page chrome beyond the frame. So this
+ * is ours to supply, and it is the only place the plugin lays out a page. */
+
+.dss-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 28px 56px;
+}
+
+.dss-pageHead {
+    margin-bottom: 4px;
+}
+
+.dss-pageTitle {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--dsw-alias-label-primary);
+}
+
+.dss-pageDesc {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--dsw-alias-label-secondary);
+}
+
+/* A section that belongs to the row above it rather than standing on its own:
+ * smaller title and no top padding, so the pair reads as one block with a
+ * sub-part — which is what the wallpaper is to the skin picker. */
+
+.dss-subRow {
+    padding-top: 0;
+}
+
+.dss-subTitle {
+    font-size: 13px;
+    line-height: 18px;
+}
+
+/* ---- controls ---- */
+
+.dss-select,
+.dss-input {
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--dsw-alias-label-primary);
+    background: var(--dsw-alias-bg-layer-3);
+    border: 0.5px solid var(--dsw-alias-border-l4);
+    border-radius: var(--dsw-radius-md, 8px);
+    outline: none;
+}
+
+.dss-select:focus-visible,
+.dss-input:focus-visible {
+    border-color: var(--dsw-alias-state-business-primary);
+    box-shadow: inset 0 0 0 0.5px var(--dsw-alias-state-business-primary);
+}
+
+.dss-input {
+    width: 100%;
+    min-width: 0;
+}
+
+.dss-btn {
+    height: 28px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 12.5px;
+    line-height: 20px;
+    color: var(--dsw-alias-label-primary);
+    background: var(--dsw-alias-button-tool-bar-fill);
+    border: 0.5px solid var(--dsw-alias-border-l4);
+    border-radius: var(--dsw-radius-md, 8px);
+    cursor: pointer;
+}
+
+.dss-btn:hover:not(:disabled) {
+    background: var(--dsw-alias-button-tool-bar-hover);
+}
+
+.dss-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.dss-btnDanger {
+    color: var(--dsw-alias-state-error-primary);
+}
+
+/* ---- switch ----
+ *
+ * This is the host's switch restated, not a lookalike. Every declaration below
+ * is copied from `dsh-client-ui-primitives/lib/Switch.module.css` and from the
+ * component that renders it, so a plugin switch and a host switch are the same
+ * object: the <button> IS the capsule (2px padding, nothing inside but the
+ * thumb), `aria-checked` on that button drives both visuals, the flat off
+ * colour is `--dsw-alias-border-l3`, the on colour is `--dsw-alias-brand-primary`,
+ * the thumb travels 16px, and both capsule and thumb opt out of the global
+ * superellipse the theme puts on `*`.
+ *
+ * Two deliberate omissions, both matching the host: there is no hover state
+ * (the host switch has none — `cursor: pointer` is the whole affordance) and no
+ * colour transition, so the fill switches instantly while only the thumb
+ * animates.
+ *
+ * Adding a declaration here that the host's switch does not have is how the two
+ * drift apart; if the host's file changes, change this block with it.
+ */
+
+.dss-switchField {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--dsw-alias-label-secondary);
+}
+
+.dss-switch {
+    box-sizing: border-box;
+    position: relative;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 20px;
+    padding: 2px;
+    border: 0;
+    border-radius: 999px;
+    /* Opt out of the superellipse a global host rule puts on every element
+     * (`dsh-client-ui-theme` ships `@supports (corner-shape:superellipse(1.5))`
+     * with `*,:before,:after { corner-shape: ... }`). Without it the capsule
+     * draws as a squashed rounded rectangle and the round thumb as a blob. */
+    corner-shape: round;
+    background: var(--dsw-alias-border-l3);
+    cursor: pointer;
+}
+
+/* The on-state keys off `aria-checked` on the button itself, exactly as the
+ * host does, so the visual state cannot disagree with what assistive technology
+ * reads. A selector on a child can never match: the attribute is not there. */
+.dss-switch[aria-checked="true"] {
+    background: var(--dsw-alias-brand-primary);
+}
+
+.dss-switch:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.dss-switch:focus-visible {
+    outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+    outline-offset: 2px;
+}
+
+.dss-switchThumb {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--dsw-alias-label-primary-foreground);
+    transition: transform 120ms ease;
+}
+
+.dss-switch[aria-checked="false"] .dss-switchThumb {
+    background: var(--dsw-alias-switch-thumb);
+}
+
+.dss-switch[aria-checked="true"] .dss-switchThumb {
+    transform: translateX(16px);
+}
+
+/* Caption: outside the button, so the capsule never grows to fit text. */
+.dss-switchText {
+    min-width: 0;
+}
+
+/* ---- skin chips ---- */
+
+.dss-swatch {
+    display: inline-flex;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 0.5px solid var(--dsw-alias-border-l3);
+}
+
+.dss-swatch span {
+    flex: 1;
+}
+
+/* ---- import panel ---- */
+
+.dss-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 0.5px solid var(--dsw-alias-border-l3);
+    border-radius: var(--dsw-radius-lg, 10px);
+    background: var(--dsw-alias-bg-layer-1);
+}
+
+.dss-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.dss-label {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-tertiary);
+}
+
+.dss-textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 108px;
+    padding: 8px 10px;
+    font-family: var(--dsw-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-primary);
+    background: var(--dsw-alias-bg-layer-3);
+    border: 0.5px solid var(--dsw-alias-border-l4);
+    border-radius: var(--dsw-radius-md, 8px);
+    outline: none;
+    resize: vertical;
+}
+
+.dss-textarea:focus-visible {
+    border-color: var(--dsw-alias-state-business-primary);
+}
+
+.dss-range {
+    width: 100%;
+    accent-color: var(--dsw-alias-brand-primary);
+}
+
+.dss-error {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-state-error-primary);
+}
+
+.dss-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-tertiary);
+}
+
+.dss-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---- ambient particle canvas (lives in shell.overlay) ---- */
+
+.dss-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* The overlay container's own rule makes every child interactive
+ * (`.overlayLayer > * { pointer-events: auto }`); this wrapper and the ripple
+ * spans inside it must stay non-interactive so they never swallow a click. */
+
+.dss-rippleLayer,
+.dss-canvas {
+    pointer-events: none;
+}

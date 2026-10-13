@@ -1,0 +1,13 @@
+# dsh-selfskin bundle layer.
+#
+# `dsh plugin add` appends this package to the profile's dsh.profile.bundles, so
+# the row below mounts without any hand edit of the profile's own patch file.
+# The `id` is the loader entry id; the plugin half lives at lib/index.js and the
+# browser half is picked up through the package's dsh.client declaration.
+#
+# A profile-level patch may still override this row by id (for example to set
+# `disabled: true`) without touching the package.
+
+- insert:
+    - id: selfskin
+      name: dsh-selfskin

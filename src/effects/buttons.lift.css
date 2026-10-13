@@ -1,0 +1,28 @@
+/* dsh-selfskin · 按钮特效 · 悬停抬升与辉光（可开关：buttons.lift）
+ *
+ * The glow is built from `--dsw-alias-brand-primary`, so it re-tints with the
+ * active skin instead of pinning a literal colour. `color-mix` degrades to the
+ * unwrapped colour on engines without it, which is what the fallback inside the
+ * second argument is for.
+ */
+
+:where(button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"]):not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--dsw-alias-brand-primary) 32%, transparent),
+        0 6px 18px -8px color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
+}
+
+:where(button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"]):not(:disabled):active {
+    transform: translateY(0) scale(0.975);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--dsw-alias-brand-primary) 24%, transparent),
+        0 2px 8px -6px color-mix(in srgb, var(--dsw-alias-brand-primary) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"]):not(:disabled):hover,
+    :where(button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"]):not(:disabled):active {
+        transform: none;
+    }
+}

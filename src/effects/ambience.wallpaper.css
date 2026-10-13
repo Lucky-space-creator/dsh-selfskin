@@ -1,0 +1,35 @@
+/* dsh-selfskin · 氛围特效 · 壁纸（可开关：ambience.wallpaper）
+ *
+ * Sits on `body::before` (the aurora owns `body::after`) with `z-index: -1`, so
+ * it renders behind body's in-flow content and is visible only where the frame
+ * is translucent. That translucency is not optional: the host paints the frame
+ * with `background: var(--dsw-alias-bg-base)`, so the client pairs this sheet
+ * with `WALLPAPER_TOKENS`, which lowers that token's alpha. Inner surfaces keep
+ * their opaque `--dsw-alias-bg-layer-*` fills, which is what keeps message text
+ * and inputs readable over a photograph.
+ *
+ * The URL is escaped by the client (`cssUrl()`) before interpolation: a quote or
+ * backslash in a pasted path would otherwise close the `url()` early and could
+ * inject further declarations.
+ *
+ * `fit` maps to concrete `background-size` / `background-repeat` pairs:
+ *   cover   -> cover / no-repeat
+ *   contain -> contain / no-repeat
+ *   stretch -> 100% 100% / no-repeat
+ *   tile    -> auto / repeat
+ */
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url("{{WALLPAPER_URL}}");
+    background-position: center center;
+    background-size: {{WALLPAPER_SIZE}};
+    background-repeat: {{WALLPAPER_REPEAT}};
+    opacity: {{WALLPAPER_OPACITY}};
+    filter: blur({{WALLPAPER_BLUR}}px);
+    transform: scale({{WALLPAPER_SCALE}});
+}

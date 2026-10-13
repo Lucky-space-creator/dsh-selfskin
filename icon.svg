@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="SelfSkin">
+  <defs>
+    <linearGradient id="dssBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="55%" stop-color="#7c5cff" />
+      <stop offset="100%" stop-color="#22d3ee" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#dssBg)" />
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5" />
+  <circle cx="24" cy="26" r="7.5" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-opacity="0.95" />
+  <path d="M40 18c6 6.5 9 11 9 15a9 9 0 0 1-18 0c0-4 3-8.5 9-15z" fill="#ffffff" fill-opacity="0.92" />
+  <path d="M16 45h32" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-opacity="0.7" />
+</svg>

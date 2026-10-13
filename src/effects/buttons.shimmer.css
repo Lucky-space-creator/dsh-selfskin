@@ -1,0 +1,26 @@
+/* dsh-selfskin · 按钮特效 · 流光（可开关：buttons.shimmer）
+ *
+ * How the sweep works without touching the host's background value: the host
+ * paints a primary button with `background: var(--dsw-alias-button-primary-fill)`.
+ * On a skin that carries a gradient, that shorthand leaves `background-size` at
+ * its initial `auto`. Widening the paint area to 200% and animating
+ * `background-position` then slides the gradient across the button. On a button
+ * whose background is a flat colour, `background-size` is inert and nothing
+ * moves — the same rule is a no-op there instead of a defect.
+ */
+
+:where(button, [role="button"], input[type="submit"], input[type="button"]):not(:disabled):hover {
+    background-size: 200% 100%;
+    animation: dsh-selfskin-sheen 2200ms ease-in-out infinite alternate;
+}
+
+@keyframes dsh-selfskin-sheen {
+    from { background-position: 0% 50%; }
+    to   { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(button, [role="button"], input[type="submit"], input[type="button"]):not(:disabled):hover {
+        animation: none;
+    }
+}

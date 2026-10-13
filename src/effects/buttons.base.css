@@ -1,0 +1,32 @@
+/* dsh-selfskin · 按钮特效 · 基础层（始终注入）
+ *
+ * Specificity is deliberately zero: every selector is wrapped in `:where(...)`,
+ * so any declaration the host itself makes still wins. The plugin only fills the
+ * gaps the host leaves, which is the difference between "adds a motion" and
+ * "fights the design system". Colours come from `--dsw-alias-*` tokens only.
+ *
+ * No selector here matches on a hashed CSS-module class or on another plugin's
+ * markup: the host's class names are build-generated and change without notice,
+ * and `practices.md` forbids reading another plugin's DOM to place styling.
+ */
+
+:where(button, [role="button"], summary, input[type="submit"], input[type="button"], input[type="reset"]) {
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        color 180ms ease,
+        box-shadow 220ms ease,
+        filter 200ms ease,
+        transform 120ms ease;
+}
+
+:where(button, [role="button"], summary, input[type="submit"], input[type="button"], input[type="reset"]):focus-visible {
+    outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(button, [role="button"], summary, input[type="submit"], input[type="button"], input[type="reset"]) {
+        transition: none;
+    }
+}

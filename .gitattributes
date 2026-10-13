@@ -1,0 +1,14 @@
+# Line endings: normalise to LF in the repository.
+#
+# `core.autocrlf=true` on its own would store CRLF for every file, and that shows
+# up as whole-file diff noise the first time anyone edits from Linux or macOS.
+# Stating `eol=lf` once here keeps the history clean on every platform.
+* text=auto eol=lf
+
+# Exception: stock Windows PowerShell 5.1 reads LF-only scripts unreliably, and
+# test/install.ps1 has to run there without a newer PowerShell.
+*.ps1 text eol=crlf
+
+# The built bundle is versioned on purpose: the profile loads lib/, not src/, so
+# a fresh clone must be installable without running the build first.
+lib/*.js text eol=lf

@@ -1,0 +1,11 @@
+# dsh-selfskin — ignore build scratch and reference extractions
+
+# Extracted app.asar reference trees (never commit; large and third-party)
+.tmp/
+*.asar
+
+# Local install / build scratch
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

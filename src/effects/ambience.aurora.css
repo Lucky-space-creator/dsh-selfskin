@@ -1,0 +1,47 @@
+/* dsh-selfskin · 氛围特效 · 极光（可开关：ambience.aurora）
+ *
+ * WHY THIS IS A BODY PSEUDO-ELEMENT
+ * The only slot large enough for a full-bleed backdrop is `shell.overlay`, but
+ * that layer sits at `z-index: 20` above the app frame — anything placed there
+ * paints ON TOP of the conversation. A backdrop that must sit BEHIND the app has
+ * to be attached to the document itself, so it lives on `body::after` (the
+ * wallpaper owns `body::before`, because one element carries one `::before`).
+ * This is a plugin-owned global style, the same mechanism the shipped
+ * ui-theme package uses for its eight stylesheets — not a patch of host markup.
+ *
+ * `z-index: -1` puts the layer under body's in-flow content, and `position:
+ * fixed` keeps it viewport-sized. It therefore shows through only where the
+ * frame is translucent, which is exactly the contract the wallpaper token layer
+ * (`WALLPAPER_TOKENS` in src/client.js) establishes.
+ *
+ * Colour stops are interpolated per render from the active skin's accent, so the
+ * aurora re-tints when the skin changes instead of pinning literals here.
+ */
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: -25%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(38% 52% at 12% 18%, {{AURORA_1}}, transparent 70%),
+        radial-gradient(42% 48% at 86% 12%, {{AURORA_2}}, transparent 72%),
+        radial-gradient(48% 58% at 68% 88%, {{AURORA_3}}, transparent 74%);
+    filter: blur(64px) saturate(1.3);
+    opacity: {{AURORA_OPACITY}};
+    animation: dsh-selfskin-aurora 26s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+@keyframes dsh-selfskin-aurora {
+    0%   { transform: translate3d(-2%, -1%, 0) scale(1.05); }
+    50%  { transform: translate3d(2%, 1.5%, 0) scale(1.12); }
+    100% { transform: translate3d(-1%, 2%, 0) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::after {
+        animation: none;
+    }
+}
