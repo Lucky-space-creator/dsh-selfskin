@@ -77,10 +77,20 @@ const SKIN_TEMPLATE = '{\n'
  * `ThemeRuntime.composeActive()` resolves. A registered theme's own tokens are the
  * opposite — plain strings — and handing a pair to `register()` is the easiest way
  * to blank a surface.
+ *
+ * WHY THESE ALPHAS ARE LOW (v1.2.1): this veil is the ceiling on how vivid the
+ * wallpaper reads — it is painted by the host frame *on top of* the `body::before`
+ * wallpaper, so the image's effective strength is `opacity x (1 - veil)`. The
+ * first cut (0.42 / 0.46) left a wallpaper at roughly a quarter of its strength,
+ * which is the "颜色过淡" report. Readability is not the reason to keep the veil
+ * heavy: message text, inputs and cards sit on the opaque `--dsw-alias-bg-layer-*`
+ * fills, so the *frame* can open up and let the photograph through. These values
+ * keep only a faint unifying tint; raise them back if a specific wallpaper proves
+ * too busy behind the frame.
  */
 const WALLPAPER_TOKENS = {
-    '--dsw-alias-bg-base': { light: 'rgba(255, 255, 255, 0.42)', dark: 'rgba(8, 12, 20, 0.46)' },
-    '--dsw-specific-sidebar-fill': { light: 'rgba(255, 255, 255, 0.5)', dark: 'rgba(8, 12, 20, 0.52)' }
+    '--dsw-alias-bg-base': { light: 'rgba(255, 255, 255, 0.2)', dark: 'rgba(8, 12, 20, 0.24)' },
+    '--dsw-specific-sidebar-fill': { light: 'rgba(255, 255, 255, 0.26)', dark: 'rgba(8, 12, 20, 0.3)' }
 };
 
 /**
@@ -235,6 +245,95 @@ const store = (() => {
         }
     };
 })();
+
+/* ------------------------------------------------------------------ *
+ * Live preview of a DIY theme
+ *
+ * The Theme Studio component (src/ui.js) has no `ctx` of its own — components
+ * share the factory scope but are mounted by the layout, not by this plugin —
+ * so the theme service is captured here on `apply` and reached through the three
+ * functions below. They are module-level (not inside `createPlugin`) so the
+ * component file, concatenated after this one, can call them by name.
+ *
+ * A preview is a throwaway registered id: `register()` a temporary skin,
+ * `setTheme()` to it, and on undo dispose that registration and restore the
+ * skin that was showing before the preview started. The host's own `theme/change`
+ * listener mirrors the preview id into `store.skinId`, which is why restore uses
+ * the captured origin rather than the live `store` value (it would read the
+ * preview id back and re-apply the now-disposed theme).
+ * ------------------------------------------------------------------ */
+
+/** The theme service, captured on `apply`; null until the plugin mounts. */
+let liveTheme = null;
+
+/** Fixed id for the throwaway preview skin. */
+const PREVIEW_ID = 'selfskin-diy-preview';
+
+/** Disposer for the preview registration, or null when no preview is live. */
+let previewDispose = null;
+
+/** Skin id that was showing when the preview started; the undo target. */
+let previewOrigin = null;
+
+/**
+ * Dispose any live preview registration and forget it.
+ *
+ * The `ThemeRuntime.register()` disposer is the ONLY handle that removes an id,
+ * so it must never be dropped while the registration is alive — doing so would
+ * leave `PREVIEW_ID` registered and make the next `applyPreviewSkin` throw a
+ * duplicate-id error that is swallowed, killing the preview silently. Every
+ * exit from a preview path (preview, undo, save) therefore routes through here.
+ */
+function disposePreview() {
+    if (previewDispose !== null) {
+        try { previewDispose(); } catch (error) { void error; }
+        previewDispose = null;
+    }
+    previewOrigin = null;
+}
+
+/** Register and show a temporary DIY skin globally. */
+function applyPreviewSkin(skin) {
+    if (liveTheme === null) return;
+    try {
+        // Clear any prior preview registration before re-registering, so a
+        // re-preview (different seeds, no intervening undo) never hits a
+        // duplicate id.
+        if (previewDispose !== null) {
+            try { previewDispose(); } catch (error) { void error; }
+            previewDispose = null;
+        }
+        previewOrigin = store.getSnapshot().skinId;
+        previewDispose = liveTheme.register({
+            id: PREVIEW_ID,
+            colorScheme: skin.colorScheme,
+            tokens: skin.tokens
+        });
+        liveTheme.setTheme(PREVIEW_ID);
+    } catch (error) {
+        void error;
+    }
+}
+
+/** Drop the preview registration without touching the theme. */
+function stopPreview() {
+    disposePreview();
+}
+
+/** Undo a preview: restore the originating skin and dispose the temp theme. */
+function revertPreviewSkin() {
+    if (liveTheme === null) return;
+    const origin = previewOrigin !== null ? previewOrigin : DEFAULT_SKIN_ID;
+    try {
+        liveTheme.setTheme(origin);
+    } catch (error) {
+        void error;
+    }
+    disposePreview();
+    // The `theme/change` listener has mirrored the preview id into the store;
+    // restore the real id so the picker reflects the undo.
+    if (store.getSnapshot().skinId !== origin) store.patch({ skinId: origin });
+}
 
 /* ------------------------------------------------------------------ *
  * Skin helpers
@@ -448,6 +547,10 @@ function createPlugin(React, h) {
          * @param ctx - client plugin context.
          */
         apply(ctx) {
+            // Capture the theme service so the Theme Studio (no ctx of its own)
+            // can preview a DIY skin globally. Cleared on teardown below.
+            liveTheme = ctx.theme;
+
             registerSkins(ctx, store.getSnapshot());
 
             // 1) Plugin-owned global stylesheet. One tag, recomposed on change.
@@ -494,6 +597,17 @@ function createPlugin(React, h) {
                     registeredIds.clear();
                 };
             }, 'selfskin: theme sync');
+
+            // Release the captured theme service on teardown, and roll back any
+            // live DIY preview so the host theme is never left on a disposed id.
+            ctx.on('dispose', () => {
+                if (previewDispose !== null) {
+                    try { previewDispose(); } catch (error) { void error; }
+                    previewDispose = null;
+                }
+                previewOrigin = null;
+                liveTheme = null;
+            });
 
             // 3) The host's own Appearance row can take the theme back at any
             //    time; mirror that into our state so the picker never lies.

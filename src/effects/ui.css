@@ -329,6 +329,103 @@
     gap: 8px;
 }
 
+/* ---- DIY theme studio ---- */
+
+.dss-studio {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 6px;
+}
+
+.dss-seedRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 18px;
+}
+
+.dss-seedItem {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.dss-seedLabel {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-secondary);
+}
+
+.dss-seedValue {
+    font-family: var(--dsw-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--dsw-alias-label-tertiary);
+}
+
+.dss-colorInput {
+    box-sizing: border-box;
+    width: 46px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0.5px solid var(--dsw-alias-border-l4);
+    border-radius: var(--dsw-radius-md, 8px);
+    cursor: pointer;
+}
+
+.dss-previewBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Brand-coloured action: the save button is the one commit, so it reads as the
+ * primary control on the row. */
+.dss-btnPrimary {
+    color: var(--dsw-alias-label-primary-foreground);
+    background: var(--dsw-alias-brand-primary);
+    border-color: transparent;
+}
+
+.dss-btnPrimary:hover:not(:disabled) {
+    background: var(--dsw-alias-brand-primary);
+    filter: brightness(1.06);
+}
+
+.dss-saved {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-state-success-primary, var(--dsw-alias-state-business-primary));
+}
+
+.dss-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 0.5px solid var(--dsw-alias-border-l3);
+    border-radius: var(--dsw-radius-md, 8px);
+    background: var(--dsw-alias-bg-layer-1);
+}
+
+.dss-warningHead {
+    margin: 0 0 2px;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-label-secondary);
+}
+
+.dss-warning {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--dsw-alias-state-warning-primary, var(--dsw-alias-state-error-primary));
+}
+
 /* ---- ambient particle canvas (lives in shell.overlay) ---- */
 
 .dss-canvas {

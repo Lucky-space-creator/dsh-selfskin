@@ -128,7 +128,7 @@ test('normalizeState turns null into documented defaults', () => {
     assert.equal(state.ambience.aurora, false);
     assert.equal(state.ambience.wallpaper.enabled, false);
     assert.equal(state.ambience.wallpaper.fit, 'cover');
-    assert.equal(state.ambience.wallpaper.opacity, 0.45);
+    assert.equal(state.ambience.wallpaper.opacity, 0.6);
     assert.equal(state.ambience.wallpaper.blur, 0);
 });
 

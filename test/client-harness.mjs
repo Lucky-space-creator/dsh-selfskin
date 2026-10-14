@@ -529,6 +529,19 @@ process.stdout.write('client bundle wiring\n');
             }
         }
         assert.ok('--dsw-alias-bg-base' in bySource['dsh-selfskin/wallpaper']);
+        // Regression guard: the wallpaper veil must stay light. It is painted by
+        // the host frame ON TOP of the wallpaper, so the image's effective
+        // strength is `opacity x (1 - veil)`. The original 0.42/0.46 veil capped
+        // the picture at ~a quarter strength — the "颜色过淡" bug. Readability
+        // comes from the opaque `--dsw-alias-bg-layer-*` fills, not from this
+        // veil, so it must not creep back up.
+        const veilAlpha = value => {
+            const match = /rgba\([^)]*,\s*([0-9.]+)\)/.exec(value);
+            return match === null ? 1 : Number(match[1]);
+        };
+        const veil = bySource['dsh-selfskin/wallpaper']['--dsw-alias-bg-base'];
+        assert.ok(veilAlpha(veil.light) < 0.35, 'wallpaper light veil must stay light (got ' + veil.light + ')');
+        assert.ok(veilAlpha(veil.dark) < 0.35, 'wallpaper dark veil must stay light (got ' + veil.dark + ')');
     });
 
     test('the stylesheet carries every enabled block', () => {

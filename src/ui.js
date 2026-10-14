@@ -394,6 +394,151 @@ function AmbienceRow() {
 }
 
 /**
+ * DIY theme studio.
+ *
+ * No `ctx` here — this component is mounted by the layout, not by the plugin —
+ * so it reaches the theme service through the module-level `applyPreviewSkin` /
+ * `revertPreviewSkin` / `stopPreview` helpers defined in src/client.js, which
+ * capture `ctx.theme` on `apply`. Derivation is pure (`deriveTokens`), so the
+ * four seed colours map to a full token table on every keystroke.
+ *
+ * Preview is global and temporary: it registers a throwaway id and `setTheme`s
+ * to it, so the whole desktop UI — not a local island — reflects the choice.
+ * Undo restores the originating skin; leaving the studio without saving reverts
+ * automatically via the unmount cleanup. Saving routes through the existing
+ * `store.addCustomSkin` path, so a DIY theme becomes a normal custom skin.
+ * @returns the studio element.
+ */
+function ThemeStudio() {
+    const [seeds, setSeeds] = React.useState({
+        accent: '#3b82f6',
+        secondary: '#22d3ee',
+        surface: '#0a1020',
+        text: '#e6edf8'
+    });
+    const [scheme, setScheme] = React.useState('dark');
+    const [name, setName] = React.useState('我的 DIY 主题');
+    const [error, setError] = React.useState('');
+    const [saved, setSaved] = React.useState(false);
+    // Whether a global preview is currently live; drives the unmount revert.
+    const previewing = React.useRef(false);
+
+    const derived = deriveTokens(seeds, scheme);
+
+    // Roll back any live preview if the studio is dismissed without saving.
+    React.useEffect(() => () => {
+        if (previewing.current === true) revertPreviewSkin();
+    }, []);
+
+    function setSeed(key, value) {
+        setSeeds(prev => ({ ...prev, [key]: value }));
+        setSaved(false);
+    }
+
+    function preview() {
+        applyPreviewSkin({ name: name || 'DIY 预览', colorScheme: scheme, tokens: derived.tokens });
+        previewing.current = true;
+        setError('');
+    }
+
+    function undo() {
+        revertPreviewSkin();
+        previewing.current = false;
+        setError('');
+    }
+
+    function save() {
+        const added = store.addCustomSkin({
+            name: name || '我的 DIY 主题',
+            colorScheme: scheme,
+            tokens: derived.tokens
+        });
+        if (added.ok !== true) {
+            setError(added.error);
+            return;
+        }
+        // Dispose the preview theme, then make the saved skin active. The sync
+        // effect re-registers the new custom skin and applies it on the patch.
+        stopPreview();
+        previewing.current = false;
+        store.patch({ skinId: added.value.id });
+        setError('');
+        setSaved(true);
+    }
+
+    const seedFields = [
+        { key: 'accent', label: '强调色' },
+        { key: 'secondary', label: '辅助色' },
+        { key: 'surface', label: '背景' },
+        { key: 'text', label: '文字' }
+    ];
+
+    return h('div', { className: 'dss-studio' },
+        h('p', { className: 'dss-hint' },
+            '从 4 颗种子色推导整套令牌。改色即时重算，可全局实时预览后再保存为新皮肤。'),
+        h('div', { className: 'dss-seedRow' },
+            seedFields.map(field => h('label', { key: field.key, className: 'dss-seedItem' },
+                h('input', {
+                    type: 'color',
+                    className: 'dss-colorInput',
+                    value: seeds[field.key],
+                    'aria-label': field.label,
+                    onChange: event => setSeed(field.key, event.target.value)
+                }),
+                h('span', { className: 'dss-seedLabel' }, field.label),
+                h('span', { className: 'dss-seedValue' }, seeds[field.key])))),
+        h('div', { className: 'dss-seedRow' },
+            h('span', { className: 'dss-seedLabel' }, '模式'),
+            h('select', {
+                className: 'dss-select',
+                value: scheme,
+                'aria-label': '配色模式',
+                onChange: event => { setScheme(event.target.value); setSaved(false); }
+            },
+                h('option', { value: 'dark' }, '暗色'),
+                h('option', { value: 'light' }, '亮色')),
+            h('span', { className: 'dss-seedLabel' }, '名称'),
+            h('input', {
+                className: 'dss-input',
+                type: 'text',
+                value: name,
+                style: { maxWidth: '200px' },
+                onChange: event => setName(event.target.value)
+            })),
+        h('div', { className: 'dss-previewBar' },
+            h('button', { type: 'button', className: 'dss-btn', onClick: preview }, '实时预览'),
+            h('button', { type: 'button', className: 'dss-btn', onClick: undo }, '撤销预览'),
+            h('button', { type: 'button', className: 'dss-btn dss-btnPrimary', onClick: save }, '保存为新皮肤'),
+            saved ? h('span', { className: 'dss-saved' }, '已保存，可在上方皮肤列表选择。') : null),
+        error ? h('p', { className: 'dss-error' }, error) : null,
+        derived.warnings.length > 0
+            ? h('div', { className: 'dss-warnings' },
+                h('p', { className: 'dss-warningHead' }, '对比度提示（不影响保存，仅供参考）：'),
+                derived.warnings.map((warning, index) => h('p', { key: index, className: 'dss-warning' }, warning)))
+            : null);
+}
+
+/**
+ * Collapsible wrapper that keeps the studio off the page until asked for.
+ * @returns the section element.
+ */
+function ThemeStudioSection() {
+    const [open, setOpen] = React.useState(false);
+    return h('div', { className: 'dss-row dss-rowWrap' },
+        h('div', { className: 'dss-row', style: { borderBottom: 'none', paddingBottom: 0 } },
+            h('div', { className: 'dss-rowMain' },
+                h('div', { className: 'dss-title' }, '主题工作室'),
+                h('div', { className: 'dss-desc' }, '从种子色推导整套令牌，实时预览并保存为自定义皮肤。')),
+            h('div', { className: 'dss-end' },
+                h('button', {
+                    type: 'button',
+                    className: 'dss-btn',
+                    onClick: () => setOpen(!open),
+                }, open ? '收起' : '打开'))),
+        open ? h(ThemeStudio) : null);
+}
+
+/**
  * The page the sidebar's 「皮肤管理」 entry opens.
  *
  * `main` is the layout's keyed slot: it renders whichever entry's `key` matches
@@ -416,7 +561,8 @@ function SkinPanel() {
                 '皮肤、按钮特效与氛围特效。所有设置只保存在本机，卸载插件后不再生效。')),
         h(SkinRow),
         h(ButtonsRow),
-        h(AmbienceRow));
+        h(AmbienceRow),
+        h(ThemeStudioSection));
 }
 
 /**

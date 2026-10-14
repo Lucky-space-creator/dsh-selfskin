@@ -24,9 +24,16 @@ export const MAX_CUSTOM_SKINS = 20;
 /** Accepted wallpaper fit modes. */
 export const WALLPAPER_FITS = ['cover', 'contain', 'stretch', 'tile'];
 
-/** Default wallpaper settings. */
+/**
+ * Default wallpaper settings.
+ *
+ * `opacity` defaults high (0.6) on purpose: a wallpaper that reads as a faint
+ * ghost behind the frame is the "颜色过淡" complaint, and the frame veil
+ * (`WALLPAPER_TOKENS` in client.js) already keeps the image from competing with
+ * text. The opacity slider (5-100%) remains the fine control.
+ */
 export function defaultWallpaper() {
-    return { enabled: false, url: '', opacity: 0.45, blur: 0, fit: 'cover', error: '' };
+    return { enabled: false, url: '', opacity: 0.6, blur: 0, fit: 'cover', error: '' };
 }
 
 /** Default button-effect switches: ripple off (opt-in), the rest on. */
@@ -85,7 +92,7 @@ export function normalizeState(raw, defaultSkinId) {
             wallpaper: {
                 enabled: wallpaper.enabled === true,
                 url: typeof wallpaper.url === 'string' ? wallpaper.url : '',
-                opacity: typeof wallpaper.opacity === 'number' ? Math.min(1, Math.max(0.05, wallpaper.opacity)) : 0.45,
+                opacity: typeof wallpaper.opacity === 'number' ? Math.min(1, Math.max(0.05, wallpaper.opacity)) : 0.6,
                 blur: typeof wallpaper.blur === 'number' ? Math.min(40, Math.max(0, wallpaper.blur)) : 0,
                 fit: WALLPAPER_FITS.includes(wallpaper.fit) ? wallpaper.fit : 'cover',
                 error: ''

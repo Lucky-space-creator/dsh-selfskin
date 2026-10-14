@@ -3,6 +3,46 @@
 All notable changes to `dsh-selfskin` are recorded here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.2.0
+
+A DIY theme studio joins the 「皮肤管理」 panel: pick four seed colours and the
+plugin derives a complete token table, preview it on the whole desktop UI, then
+save it as a custom skin. The derivation is a pure, dependency-free engine
+(`src/derive.js`) so it is unit-tested in Node and inlined into the browser
+bundle with its `export` keywords stripped, like `src/pure.js`.
+
+### Added
+- `src/derive.js` — a OKLab colour pipeline (`hexToRgb`, `rgbToOklab`,
+  `oklabToRgb`, `mixOklab`, `withAlpha`, `contrastHex`) and `deriveTokens(seeds,
+  scheme)`. Derivation mixes in the OKLab space so a 10% lightness step looks the
+  same across hues, and it *warns* about contrast shortfalls rather than silently
+  rewriting the user's colours — a DIY tool defers the aesthetic call to the user.
+- `ThemeStudio` and `ThemeStudioSection` in `src/ui.js`. Four colour inputs
+  (accent / secondary / surface / text), a light/dark switch and a name field
+  feed `deriveTokens` on every keystroke; 「实时预览」 registers a throwaway theme
+  id and `setTheme`s to it, so the whole desktop reflects the choice, and 「撤销预览」
+  restores the originating skin. 「保存为新皮肤」 routes through the existing
+  `store.addCustomSkin` path, so a DIY theme is an ordinary custom skin.
+- A module-level preview controller in `src/client.js` (`applyPreviewSkin`,
+  `revertPreviewSkin`, `stopPreview`) that captures `ctx.theme` on `apply` and is
+  reached by the studio component, which has no `ctx` of its own. The temp id is
+  always disposed before re-registration, so a second preview never trips a
+  duplicate-id error, and plugin teardown rolls back any live preview.
+- `test/derive.test.mjs` — falsifiable assertions for the colour maths and the
+  derivation contract (32 `--dsw-` tokens, seeds land un-rewritten, bad seeds
+  warn and fall back, low contrast warns but is kept).
+
+### Changed
+- `build.mjs` now inlines `src/derive.js` into the bundle factory scope, between
+  `src/pure.js` and `src/client.js`.
+
+### Fixed
+- **壁纸颜色过淡**。根因是宿主画框用 `--dsw-alias-bg-base` 在 `body::before` 壁纸
+  *之上*盖了一层 0.42/0.46 的半透明 veil，使壁纸有效强度只有约四分之一。该 veil 已调淡
+  （bg-base 0.2/0.24、sidebar-fill 0.26/0.3）——可读性由不透明的
+  `--dsw-alias-bg-layer-*` 承载，与这层 veil 无关；默认不透明度同时从 0.45 提到 0.6。
+  `test/client-harness.mjs` 新增可证伪断言，防止 veil 回调导致壁纸再次被洗淡。
+
 ## 1.1.0
 
 The plugin stops living inside the host's general settings and gets a surface of

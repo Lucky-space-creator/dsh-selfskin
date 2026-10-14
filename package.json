@@ -1,7 +1,7 @@
 {
   "name": "dsh-selfskin",
-  "version": "1.1.0",
-  "description": "DSH SelfSkin - 为 DeepSeek Harness 桌面端提供皮肤特效与按钮特效：内置皮肤 + 自定义导入、氛围特效（极光 / 光尘 / 毛玻璃 / 壁纸）、可开关的按钮涟漪与流光。",
+  "version": "1.2.0",
+  "description": "DSH SelfSkin - 为 DeepSeek Harness 桌面端提供皮肤特效与按钮特效：内置皮肤 + 自定义导入、DIY 主题工作室（种子色推导整套令牌 + 实时预览）、氛围特效（极光 / 光尘 / 毛玻璃 / 壁纸）、可开关的按钮涟漪与流光。",
   "license": "MIT",
   "author": "dsh-selfskin",
   "type": "module",
@@ -37,7 +37,7 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "node --check lib/index.js && node --check lib/client.js",
-    "test": "node test/validate-package.mjs && node test/pure.test.mjs && node test/client-harness.mjs",
+    "test": "node test/validate-package.mjs && node test/pure.test.mjs && node test/derive.test.mjs && node test/client-harness.mjs",
     "verify": "npm run build && npm run check && npm test"
   },
   "dsh": {

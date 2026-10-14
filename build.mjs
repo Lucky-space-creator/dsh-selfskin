@@ -10,15 +10,18 @@
  * Assembly order matters and is not cosmetic:
  *   1. injected constants (`SKINS`, `DEFAULT_SKIN_ID`, `CSS`)
  *   2. src/pure.js   — dependency-free helpers (exports stripped)
- *   3. src/client.js — stores, helpers, createPlugin
- *   4. src/ui.js     — React components
- *   5. `return createPlugin(React, h)`
+ *   3. src/derive.js — DIY palette derivation (exports stripped, self-contained)
+ *   4. src/client.js — stores, helpers, createPlugin
+ *   5. src/ui.js     — React components
+ *   6. `return createPlugin(React, h)`
  *
- * pure.js, client.js and ui.js are plain scripts that share the factory's scope,
- * so the `const` declarations above them are visible to all of them, and the
- * function declarations in any of them are hoisted for the others. Nothing is
- * evaluated at factory-entry time except the constants, so no temporal-dead-zone
- * read occurs.
+ * pure.js, derive.js, client.js and ui.js are plain scripts that share the
+ * factory's scope, so the `const` declarations above them are visible to all of
+ * them, and the function declarations in any of them are hoisted for the others.
+ * Nothing is evaluated at factory-entry time except the constants, so no
+ * temporal-dead-zone read occurs. derive.js is self-contained: it does not reach
+ * into pure.js, so its position relative to the others only needs to precede the
+ * one call site in ui.js.
  *
  * Usage: node build.mjs
  */
@@ -121,12 +124,13 @@ await mkdir(LIB, { recursive: true });
 const hostSource = await readText(join(SRC, 'index.js'));
 await writeFile(join(LIB, 'index.js'), hostSource, 'utf8');
 
-// Browser half: helpers, then the plugin body, then the component definitions —
-// all sharing one factory scope.
+// Browser half: helpers, then the derivation engine, then the plugin body, then
+// the component definitions — all sharing one factory scope.
 const pureBody = stripExports(await readText(join(SRC, 'pure.js')));
+const deriveBody = stripExports(await readText(join(SRC, 'derive.js')));
 const clientBody = await readText(join(SRC, 'client.js'));
 const uiBody = await readText(join(SRC, 'ui.js'));
-await writeFile(join(LIB, 'client.js'), wrapBundle([pureBody, clientBody, uiBody].join('\n')), 'utf8');
+await writeFile(join(LIB, 'client.js'), wrapBundle([pureBody, deriveBody, clientBody, uiBody].join('\n')), 'utf8');
 
 const styleCount = Object.keys(CSS).length;
 process.stdout.write(
